@@ -13,11 +13,15 @@ function getMinimumValue(value, min) {
   return value < min ? min : value;
 }
 
+function getMaximumValue(value, max) {
+  return value > max ? max : value;
+}
+
 app.get("/", (req, res) => {
   res.send(`
     <html>
       <body>
-        <form action="/optimize" method="post" enctype="multipart/form-data">
+        <form action="/avatar" method="post" enctype="multipart/form-data">
           <input type="file" name="image" />
           <button type="submit">Optimize</button>
         </form>
@@ -33,10 +37,16 @@ app.post("/avatar", upload.single("image"), async (req, res) => {
     const { width: currentImageWidth, height: currentImageHeight } =
       sizeOf(imageBuffer);
 
+    const newWidth = getMinimumValue(
+      getMaximumValue(currentImageWidth, currentImageHeight),
+      500
+    );
+
     const optimizedImage = await sharp(imageBuffer)
       .resize({
-        width: getMinimumValue(currentImageWidth, 500),
-        height: getMinimumValue(currentImageHeight, 500),
+        width: newWidth,
+        height: newWidth,
+        fit: "cover",
       })
       .webp({ quality: 75 })
       .toBuffer();
